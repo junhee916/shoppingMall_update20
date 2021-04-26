@@ -1,6 +1,7 @@
 const express = require('express')
 const userModel = require('../model/user')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const router = express.Router()
 
 // userInfo
@@ -90,6 +91,44 @@ router.post('/signup', (req, res) => {
 // 로그인
 router.post('/login', (req, res) => {
 
+    const {email, password} = req.body
+
+    userModel
+        .findOne({email})
+        .then(user => {
+            if(!user){
+                return res.status(401).json({
+                    msg : "user email, please other email"
+                })
+            }
+            else{
+                bcrypt.compare(password, user.password, (err, isMatch) => {
+                    if(err || isMatch === false){
+                        return res.status(402).json({
+                            msg : "password not match"
+                        })
+                    }
+                    else{
+                        const token = jwt.sign(
+                            {id : user._id, email : user.email},
+                            process.env.SECRET_KEY,
+                            {expiresIn: '1h'}
+                        )
+
+                        res.json({
+                            msg : 'successful login',
+                            userInfo : user,
+                            tokenInfo : token
+                        })
+                    }
+                })
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                msg : err.message
+            })
+        })
 })
 
 // 회원탈퇴

@@ -3,7 +3,8 @@ const mongoose = require('mongoose')
 const options = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useFindAndModify : false
+    useFindAndModify : false,
+    useCreateIndex : true
 }
 
 mongoose
